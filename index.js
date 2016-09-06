@@ -1,20 +1,34 @@
-/* global AFRAME, THREE */
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
 /**
- * Cubemap component for A-Frame.
+ * aframe-altspace-component component for A-Frame.
  */
-AFRAME.registerComponent('cubemap', {
-  schema: {
-    folder: {
-      type: 'string'
-    },
-    edgeLength: {
-      type: 'int',
-      default: 5000
+AFRAME.registerComponent('altspace', {
+
+  /**
+   * usePixelScale will allow you to use A-Frame units as CSS pixels. This is the default behavior for three.js apps, but not for A-Frame apps.  verticalAlign puts the origin at the bottom, middle (default), or top of the Altspace enclosure.
+   */
+  schema: { 
+    usePixelScale: { type: 'boolean', default: 'false'},
+    verticalAlign: { type: 'string', default: 'middle'}
+  },
+
+  /**
+   * Called once when component is attached. Generally for initial setup.
+   */
+  init: function () {
+    if (!(this.el.object3D instanceof THREE.Scene)) {
+      console.warn('aframe-altspace-component can only be attached to a-scene');
+      return;
     }
+
+    if (window.altspace && window.altspace.inClient) {
+      this.initRenderer();
+      this.initCursorEvents();
+    }
+
   },
 
   /**
@@ -22,59 +36,123 @@ AFRAME.registerComponent('cubemap', {
    * Generally modifies the entity based on the data.
    */
   update: function (oldData) {
-    // entity data
-    var el = this.el;
-    var data = this.data;
 
-    // Path to the folder containing the 6 cubemap images
-    var srcPath = data.folder;
-
-    // Cubemap image files must follow this naming scheme
-    // from: http://threejs.org/docs/index.html#Reference/Textures/CubeTexture
-    var urls = [
-      'posx.jpg', 'negx.jpg',
-      'posy.jpg', 'negy.jpg',
-      'posz.jpg', 'negz.jpg'
-    ];
-
-    // Code that follows is adapted from "Skybox and environment map in Three.js" by Roman Liutikov
-    // http://blog.romanliutikov.com/post/58705840698/skybox-and-environment-map-in-threejs
-
-    // Create loader, set folder path, and load cubemap textures
-    var loader = new THREE.CubeTextureLoader();
-    loader.setPath(srcPath);
-
-    var cubemap = loader.load(urls);
-    cubemap.format = THREE.RGBFormat;
-
-    var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
-
-    // Create shader material
-    var skyBoxShader = new THREE.ShaderMaterial({
-      fragmentShader: shader.fragmentShader,
-      vertexShader: shader.vertexShader,
-      uniforms: shader.uniforms,
-      depthWrite: false,
-      side: THREE.BackSide
-    });
-
-    // Clone ShaderMaterial (necessary for multiple cubemaps)
-    var skyBoxMaterial = skyBoxShader.clone();
-    skyBoxMaterial.uniforms['tCube'].value = cubemap; // Apply cubemap textures to shader uniforms
-
-    // Set skybox dimensions
-    var edgeLength = data.edgeLength;
-    var skyBoxGeometry = new THREE.CubeGeometry(edgeLength, edgeLength, edgeLength);
-
-    // Set entity's object3D
-    el.setObject3D('cubemap', new THREE.Mesh(skyBoxGeometry, skyBoxMaterial));
   },
 
   /**
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function () {
-    this.el.removeObject3D('cubemap');
-  }
+  remove: function () { },
+
+  /**
+   * Called on each scene tick.
+   */
+  // tick: function (t) { },
+
+  /**
+   * Called when entity pauses.
+   * Use to stop or remove any dynamic or background behavior such as events.
+   */
+  pause: function () { },
+
+  /**
+   * Called when entity resumes.
+   * Use to continue or add any dynamic or background behavior such as events.
+   */
+  play: function () { },
+
+
+  /********** Helper Methods **********/
+
+  /**
+   * Swap in Altspace renderer when running in AltspaceVR.
+   */
+  initRenderer: function () {
+
+    var scene = this.el.object3D;
+    if (!this.data.usePixelScale) {
+      altspace.getEnclosure().then(function(e) {
+        scene.scale.multiplyScalar(e.pixelsPerMeter);
+      });
+    }
+    var verticalAlign = this.data.verticalAlign;
+    if (verticalAlign !== 'center') {
+      altspace.getEnclosure().then(function(e) {
+        switch (verticalAlign) {
+          case 'bottom':
+            scene.position.y -= e.innerHeight / 2;
+            break;
+          case 'top':
+            scene.position.y += e.innerHeight / 2;
+            break;
+          default:
+            console.warn('Unexpected value for verticalAlign: ', this.data.verticalAlign);
+        }
+      });
+    }
+    var renderer = this.el.renderer = altspace.getThreeJSRenderer();
+    var noop = function() {};
+    renderer.setSize = noop;
+    renderer.setPixelRatio = noop;
+    renderer.setClearColor = noop;
+    renderer.clear = noop;
+    renderer.enableScissorTest = noop;
+    renderer.setScissor = noop;
+    renderer.setViewport = noop;
+    renderer.getPixelRatio = noop;
+    renderer.getMaxAnisotropy = noop;
+    renderer.setFaceCulling = noop;
+    renderer.context = {canvas: {}};
+    renderer.shadowMap = {};
+
+  },  
+
+  /**
+   * Emulate A-Frame cursor events when running in altspaceVR.
+   */
+  initCursorEvents: function() {
+
+    var scene = this.el.object3D;
+    var cursorEl = document.querySelector('a-cursor') || document.querySelector('a-entity[cursor]');
+    if (cursorEl) { 
+      // Hide A-Frame cursor mesh.
+      cursorEl.setAttribute('material', 'transparent', true);
+      cursorEl.setAttribute('material', 'opacity', 0.0);
+    }
+
+    var emit = function(eventName, targetEl) {
+      // Fire events on intersected object and A-Frame cursor.
+      if (targetEl) targetEl.emit(eventName, {target: targetEl});
+      if (cursorEl) cursorEl.emit(eventName, {target: targetEl});
+    } ;
+
+    var cursordownObj = null;
+    scene.addEventListener('cursordown', function(event) {
+      cursordownObj = event.target;
+      emit('mousedown', event.target.el);
+    });
+
+    scene.addEventListener('cursorup', function(event) {
+      emit('mouseup', event.target.el);
+      if (event.target.uuid === cursordownObj.uuid) {
+        emit('click', event.target.el);
+      }
+      cursordownObj = null;
+    });
+
+    scene.addEventListener('cursorenter', function(event) {
+      event.target.el.addState('hovered');
+      if (cursorEl) cursorEl.addState('hovering');
+      emit('mouseenter', event.target.el);
+    });
+
+    scene.addEventListener('cursorleave', function(event) {
+      event.target.el.removeState('hovered');
+      if (cursorEl) cursorEl.removeState('hovering');
+      emit('mouseleave', event.target.el);
+    });
+
+  },
+
 });

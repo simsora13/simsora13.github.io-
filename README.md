@@ -1,45 +1,23 @@
-## aframe-cubemap-component
+## aframe-altspace-component
 
-An [A-Frame](https://aframe.io) component for creating a skybox from a cubemap.
+Component to make an [A-Frame](https://aframe.io) scene compatible with [AltspaceVR](http://altvr.com). When loading your scene in Altspace, the Altspace Render is used instead of the WebGLRender. Behavior outside of Altspace is not affected.
+
+Live examples: http://altspacevr.github.io/aframe/examples/ (forked from [aframevr/aframe](https://github.com/aframevr/aframe))
+
+Note that when running in Altspace, the scene will not be synchronized between users.  In addition, some A-Frame features are currently not supported in Altspace, such as lighting and video.  For details, see the [Three.js Feature Support](http://github.com/AltspaceVR/AltspaceSDK#threejs-feature-support) section in the [AltspaceSDK](http://github.com/AltspaceVR/AltspaceSDK) repo. 
 
 ### Properties
 
-|  Property  |               Description               | Default Value |
-|:----------:|:---------------------------------------:|:-------------:|
-|   folder   | Path to the folder holding your cubemap |      none     |
-| edgeLength |  Controls the dimensions of the skybox  |      5000     |
-
-By default, the height, width, and depth of the skybox are set to 5000. In other words, the dimensions of the skybox are 5000x5000x5000.
+| Property  | Description | Default Value |
+| --------  | ----------- | ------------- |
+| `usePixelScale` | Treat a unit as a CSS Pixel, and have your scene scale with the scale of the AltspaceVR web browser. This is the default behavior in AltspaceVR for three.js apps. In A-Frame, however, the default value is `false`, as units are in meters by default. | `false`
+| `verticalAlign` | Puts the scene origin at the bottom, middle, or top of the Altspace enclosure.  If your scene seems to be floating in midair, try setting this to 'bottom'. | `middle`
 
 ### Usage
+Add the "altspace" parameter on your `<a-scene>` like so: `<a-scene altspace>`
 
-Attach the component to an entity using the path to the folder holding your cubemap as the attribute.
 
-```html
-  <a-entity cubemap="folder: /assets/Yokohama3/"></a-entity>
-```
-
-Inside the folder, the component assumes the following naming scheme:
-
-```javascript
-  var urls = [
-    'posx.jpg', 'negx.jpg',
-    'posy.jpg', 'negy.jpg',
-    'posz.jpg', 'negz.jpg'
-  ];
-```
-
-This is the scheme used by Three.js's [CubeTexture](http://threejs.org/docs/index.html#Reference/Textures/CubeTexture). If your cubemap images do not follow this scheme, you will need to rename them (or fork this repo and alter the above in index.js).
-
-The Yokohama cubemap texture is the work of [Emil Persson, aka Humus](http://www.humus.name). Check out his website, it is a good source for [cubemap textures](http://www.humus.name/index.php?page=Textures).
-
-To modify the size of the resulting skybox, use the edgeLength property.
-
-```html
-  <a-entity cubemap="folder: /assets/Yokohama3/; edgeLength: 1000"></a-entity>
-```
-
-#### Browser Installation
+#### Example
 
 Install and use by directly including the [browser files](dist):
 
@@ -47,14 +25,12 @@ Install and use by directly including the [browser files](dist):
 <head>
   <title>My A-Frame Scene</title>
   <script src="https://aframe.io/releases/0.2.0/aframe.min.js"></script>
-  <script src="https://rawgit.com/bryik/aframe-cubemap-component/master/dist/aframe-cubemap-component.min.js"></script>
+  <script src="https://cdn.rawgit.com/AltspaceVR/aframe-altspace-component/v0.2.2/dist/aframe-altspace-component.min.js"></script>
 </head>
 
 <body>
-  <a-scene>
-    <a-entity cubemap="folder: /assets/Yokohama3/"></a-entity>
+  <a-scene altspace>
+    <a-entity geometry="primitive: box" material="color: #C03546"></a-entity>
   </a-scene>
 </body>
 ```
-
-
