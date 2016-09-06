@@ -1,0 +1,46 @@
+# Blender MTL File: 'None'
+# Material Count: 4
+
+newmtl Material__113
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.373774 0.373774 0.373774
+Ke 0.000000 0.000000 0.000000
+Ni -1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\Ben\\Desktop\\3d\\models\\Animal Crossing - City Folk\\Cat\\35 - Tom\\b0.png
+
+newmtl Material__114
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.373774 0.373774 0.373774
+Ke 0.000000 0.000000 0.000000
+Ni -1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\Ben\\Desktop\\3d\\models\\Animal Crossing - City Folk\\Cat\\35 - Tom\\e.0.png
+
+newmtl Material__115
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.373774 0.373774 0.373774
+Ke 0.000000 0.000000 0.000000
+Ni -1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\Ben\\Desktop\\3d\\models\\Animal Crossing - City Folk\\Cat\\35 - Tom\\cloth.png
+
+newmtl Material__116
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.373774 0.373774 0.373774
+Ke 0.000000 0.000000 0.000000
+Ni -1.000000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\Ben\\Desktop\\3d\\models\\Animal Crossing - City Folk\\Cat\\35 - Tom\\m.0.png
