@@ -6,6 +6,16 @@
   <style>.prepros-reload *, .prepros-reload { -webkit-transition: all .5s; -moz-transition: all .5s; transition: all .5s;}</style><script src="https://aframe.io/releases/0.3.1/aframe-inspector.min.js"></script></head>
   <body class="a-body aframe-inspector-opened">
     <a-scene class="fullscreen" canvas="" inspector="" keyboard-shortcuts="" vr-mode-ui="">
+
+	<a-assets>
+        <a-asset-item id="tree1" src="../_models/tree1/tree1.dae"></a-asset-item>
+        <a-asset-item id="tree2" src="../_models/tree2/tree2.dae"></a-asset-item>
+        <a-asset-item id="crate-mtl" src="models/crate.mtl"></a-asset-item>
+        <a-asset-item id="crate-obj" src="models/crate.obj"></a-asset-item>
+       
+      </a-assets>
+
+      <a-obj-model src="#crate-obj" mtl="#crate-mtl"><a-obj-model>
 	
 	
       <a-sphere position="0 1.25 -1" radius="1.25" color="#EF2D5E" material="" geometry="" rotation="" scale="" visible=""></a-sphere>
